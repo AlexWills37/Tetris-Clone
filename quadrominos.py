@@ -23,9 +23,15 @@ import graphics as gr
 
 
 class Block():
-    ''' Blocks take up spaces in the play grid and have collision '''
+    ''' Blocks take up spaces in the play grid and have collision 
+    These blocks make up Quadromino pieces'''
 
     def __init__(self, init_col, init_row, color):
+        ''' Initializes Block object
+        INPUT
+        init_col (int) [0, 9] - the column for the block to start in
+        init_row (int) [0, 19] - the row for the block to start in
+        color (Str) - the Block's color '''
         self.col = init_col
         self.row = init_row
         # Each block is a 20 x 20 pixel rectangle
@@ -48,18 +54,26 @@ class Block():
         return self.square
 
     def setColor(self, color):
-        ''' Changes the color of the block '''
+        ''' Changes the color of the block
+        INPUT
+        color (Str) - the color to change the block to '''
         self.square.setFill(color)
 
     def draw(self, win):
-        ''' Draws the Block to the window '''
+        ''' Draws the Block to the window 
+        INPUT
+        win (gr.GraphWin) the current graphics window'''
         self.square.draw(win)
 
     def undraw(self):
+        ''' Undraws the Block object '''
         self.square.undraw()
     
     def move(self, dx, dy):
-        ''' Moves piece dx and dy units (each unit is 20 pixels / 1 grid space) '''
+        ''' Moves piece dx and dy units (each unit is 20 pixels / 1 grid space) 
+        INPUT
+        dx (int) - the desired change in x / column number
+        dy (int) - the desired change in y / row number'''
         self.col += dx
         self.row += dy
         self.square.move(20 * dx, 20 * dy)
@@ -85,7 +99,9 @@ class Quadromino():
         #self.color = "color"
   
     def draw(self, win):
-        ''' Draws the piece to the screen '''
+        ''' Draws the piece to the screen 
+        INPUT
+        win (gr.GraphWin) - the main graphics window'''
         for ghost in self.ghosts:
             ghost.draw(win)
         for block in self.squares:
@@ -99,7 +115,14 @@ class Quadromino():
             block.undraw()
             
     def checkMove(self, dx, dy, grid):
-        ''' Returns true if piece can move dx dy units on the grid '''
+        ''' Returns true if piece can move dx dy units on the grid 
+        INPUT
+        dx (int) - the desired change in x / column number
+        dy (int) - the desired change in y / row number
+        grid (PlayGrid) - the game's PlayGrid
+        
+        OUTPUT
+        canMove (bool) - True if the piece can move to the desired position without collision'''
 
         canMove = True
         for block in self.squares:
@@ -116,8 +139,12 @@ class Quadromino():
         return canMove 
      
     def move(self, dx, dy, grid):
-        ''' Move the entire piece dx, dy units / grid spaces (20 pixels) 
-        grid (PlayGrid) is the current PlayGrid for the game'''
+        ''' Moves the entire piece dx, dy units / grid spaces (20 pixels) 
+        grid (PlayGrid) is the current PlayGrid for the game
+        INPUT
+        dx (int) - the desired change in x / column number
+        dy (int) - the desired change in y / row number
+        grid (PlayGrid) - the game's PlayGrid object'''
 
         # If projected space is not occupied, move block:
         if self.checkMove(dx, dy, grid):
@@ -125,7 +152,9 @@ class Quadromino():
                 block.move(dx, dy)
         
     def hardDrop(self, grid):
-        ''' Drops piece as far as it will go and deposits it in place '''
+        ''' Drops piece as far as it will go and deposits it in place 
+        INPUT
+        grid (PlayGrid) - the game's current PlayGrid'''
         # Calls move down method enough times to collide
         for i in range(21):
             self.move(0, 1, grid)
@@ -133,17 +162,24 @@ class Quadromino():
         self.depositQuadromino(grid) 
 
     def canRotate(self, grid):
-        ''' Returns true if piece can rotate '''
+        ''' Returns true if piece can rotate 
+        INPUT
+        grid (PlayGrid) - the game's PlayGrid'''
         pass
         
     def rotate(self, direction, grid):
         ''' Rotates the piece in the direction specified. 
-        direction = +1 for clockwise
-        direction = -1 for counterclockwise '''
+        INPUT
+        direction (int) {1, -1}
+            +1 for clockwise
+            -1 for counterclockwise 
+        grid (PlayGrid) - the game's PlayGrid'''
         pass
 
     def depositQuadromino(self, grid):
-        ''' Places Quadromino onto the PlayGrid '''
+        ''' Places Quadromino onto the PlayGrid 
+        INPUT
+        grid (PlayGrid) - the game's PlayGrid'''
         # Places Blocks
         for block in self.squares:
             grid.setSpace(block)
@@ -153,7 +189,12 @@ class Quadromino():
             ghost.undraw()
 
     def calcGhostMove(self, grid):
-        ''' Returns the number of spaces a ghost projection can move down '''
+        ''' Returns the number of spaces a ghost projection can move down 
+        INPUT
+        grid (PlayGrid) - the game's PlayGrid
+        
+        OUTPUT
+        num_moves (int) the number of times the ghost projection can move down before colliding'''
 
         num_moves = 0
 
@@ -175,7 +216,9 @@ class Quadromino():
         return num_moves
 
     def projectGhost(self, grid):
-        ''' Projects the landing location of the Quadromino '''
+        ''' Projects the landing location of the Quadromino 
+        INPUT
+        grid (PlayGrid) - the game's PlayGrid'''
         # Match ghost with actual piece
         for idx in range(4):
             ghost_x = self.ghosts[idx].getColPos()
@@ -253,12 +296,18 @@ class Quadromino():
    
     def canHold(self):
         ''' Returns true if the piece can be held, and sets can_hold to False '''
-        result = self.can_hold
-        self.can_hold = False
-        return result
+        return self.can_hold
+
+    def setCanHold(self, state):
+        '''Sets the can_hold value
+        INPUT
+        state (bool) - whether or not the piece can be held '''
+        self.can_hold = state
 
     def resetPiece(self, grid):
-        ''' Returns piece to its original state and location '''
+        ''' Returns piece to its original state and location 
+        INPUT
+        grid (PlayGrid) - the game's PlayGrid'''
         # Move to above the grid (to avoid all collision)
         while not (self.square1.getRowPos() < -3):
             for square in self.squares:     # Bypass checkMove to avoid collision with potential pieces above

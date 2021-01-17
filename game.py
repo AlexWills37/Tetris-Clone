@@ -28,7 +28,9 @@ import quadrominos as quad
 
 
 class PlayGrid():
-    ''' A data structure to manage the grid for collision detection. Stores blocks and their locations'''
+    ''' A data structure to manage the grid for collision detection. Stores blocks and their locations,
+    as well as the upcoming Quadrominos and the Quadromino on hold.
+    The game will have one PlayGrid instantiated to manage the game.'''
     def __init__(self, cols, rows):
         ''' Creates a 2D array with rows number of rows and cols number of columns
         INPUT
@@ -50,19 +52,15 @@ class PlayGrid():
         self.score = 0
 
     def getScore(self):
-        ''' Returns the current score 
-        OUTPUT 
-        score (int) the player's score'''
+        ''' Returns the current score (int)'''
         return self.score
 
     def getNumLines(self):
-        ''' Returns the number of lines that have been cleared so far
-        OUTPUT
-        num_line_clears (int) the number of lines cleared '''
+        ''' Returns the number of lines that have been cleared so far (int)'''
         return self.num_line_clears
 
     def gameActive(self):
-        ''' Returns true if the game is active, false if there is a game over '''
+        ''' Returns true if the game is active, false if there is a game over (bool) '''
         return not self.game_over
                 
     def gameOver(self):
@@ -70,34 +68,59 @@ class PlayGrid():
         self.game_over = True
 
     def getSpace(self, col, row):
-        ''' Returns the object at the specified location of the grid '''
+        ''' Returns the object at the specified location of the grid 
+        INPUT
+        col (int) [0, 9] - the column number to search
+        row (int) [0, 19] - the row number to search
+
+        Possible Outputs: None
+                          Block object'''
         return self.grid[row][col]
 
     def setSpace(self, block):
-        ''' Sets the space occupied by a Block to the Block '''
+        ''' Sets the space occupied by a Block to the Block
+        INPUT
+        block (Block) - the Block object to lock into place
+        
+        OUTPUT
+        if the Block cannot be locked in (space out of bounds or already occupied), set game_over
+        to True
+        Saves the Block object to it's location on PlayGrid '''
         row = block.getRowPos()
         col = block.getColPos()
         if row < 0 or self.spaceOccupied(col, row):
-            # game over
+            # game over if out of bounds or if space is already occupied
             self.game_over = True
-            if row > 0:
+            if row >= 0: # if it is in-bounds, undraw the existing block
                 self.getSpace(col, row).undraw()
+
         self.grid[row][col] = block
 
     def spaceOccupied(self, col, row):
         ''' Returns true if the space is occupied by a non-zero value
-        OR returns true if space is out of bounds (piece is unable to move there) '''
+        OR returns true if space is out of bounds (piece is unable to move there)
+        INPUT
+        col (int) [0, 9] - the column number to search
+        row (int) [0, 19] - the row number to search
+        
+        OUPUT
+        bool representing if the specified space is occupied'''
         value = True
         if col >= 0 and row >= 0 and col < 10 and row < 20:
             if self.grid[row][col] == None:
                 value = False
-        # Allow blocks to go on top of screen
+        # Allow blocks to go on top of screen by not checking out of bounds above the Grid
         elif row < 0:
             value = False
         return value
 
     def getNextQuadromino(self, window):
-        ''' Returns the next Quadromino and removes it from the up_next list '''
+        ''' Returns the next Quadromino and removes it from the up_next list 
+        INPUT
+        window (gr.GraphWin) - the graphics window
+        
+        OUTPUT
+        piece (Quadromino) - the next piece to enter play'''
         # Get next piece, undraw its mini icon, and draw the next mini icon
         piece = self.up_next.pop(0)
         piece.undrawMini()
@@ -109,8 +132,11 @@ class PlayGrid():
         return piece
     
     def replenishQuadrominos(self):
-        ''' Adds one of each Quadromino shape to the list of upcoming pieces.
-        The Quadrominos are added in a random order '''
+        ''' Refills the up_next list of Quadrominos
+        Adds one of each Quadromino shape to the list of upcoming pieces.
+        The Quadrominos are added in a random order 
+        
+        NO INPUT/OUTPUT'''
         seven_pieces = [quad.SQuadromino(), quad.ZQuadromino(), quad.JQuadromino(), quad.LQuadromino(),
                         quad.TQuadromino(), quad.OQuadromino(), quad.IQuadromino()]
         while(len(seven_pieces) > 0):
@@ -120,7 +146,9 @@ class PlayGrid():
             self.up_next.append(piece)
 
     def shiftDown(self, row): 
-        ''' Moves every row above the one given down '''
+        ''' Shifts all rows above the given one down by 1 row 
+        INPUT
+        row (int) [0, 19] - a row that should be recently cleared and empty'''
         # Start at the cleared line, work way up
         while(row > 0):
             # Alias line and line above (lists passed by reference)
@@ -139,7 +167,9 @@ class PlayGrid():
             self.grid[0][index] = None
 
     def clearRow(self, row):
-        ''' Clears a row on the grid and moves every row above down '''
+        ''' Clears a row on the grid and moves every row above down 
+        INPUT
+        row (int) [0, 19] - the row to be cleared'''
         # Set all of the row to None and shift the above rows down
         for index in range(0, len(self.grid[row])):
             # If theres a block, undraw the block
@@ -149,9 +179,12 @@ class PlayGrid():
         self.shiftDown(row)
 
     def clearLines(self, win):
-        ''' Goes through the grid and clears any rows that are full '''
+        ''' Goes through the grid and clears any rows that are full, adding points to the score
+        and shifting all rows as necessary 
+        INPUT
+        win (gr.GraphWin) - the graphics window in use'''
         full_rows = []
-        # Check every row
+        # Check every row for fullness
         for row_num in range(0, 20):
             # If any space is empty, all_blocks is False
             all_blocks = True
@@ -176,16 +209,25 @@ class PlayGrid():
         self.score += (len(full_rows)**2) * 100
 
     def showUpNext(self, window):
-        ''' Displays the next piece by the corner of the grid '''
+        ''' Displays the next piece by the corner of the grid 
+        INPUT
+        window (gr.GraphWin) - the graphics window in use'''
         # draw the mini icon for the next piece
         next_piece = self.up_next[0]
         next_piece.drawMiniIcon(window, 0)
 
     def holdQuadromino(self, piece, window):
         ''' Swaps the current piece with the piece in the "hold" position. 
-        Returns the next piece if possible (update the active piece)'''
+        Returns the next piece if possible (update the active piece)
+        INPUT
+        piece (Quadromino) - the current active piece in play
+        window (gr.GraphWin) - the graphics window in use
+        
+        OUTPUT
+        next_piece (Quadromino) - replacement for the current active piece in play'''
         next_piece = piece  # If piece cannot hold, it returns the same piece.
         if piece.canHold():
+            piece.setCanHold(False)
             # Reset current piece
             piece.resetPiece(self)
             # Get the held piece/make a new one, and hold the current piece
@@ -211,7 +253,12 @@ class PlayGrid():
         return string
 
 def drawGradient(window, red, green, blue):
-    '''Creates a 10 stage gradient accros the bakcground from the given RGB values to white'''
+    '''Creates a 10 stage gradient accros the bakcground from the given RGB values to white
+    INPUT
+    window (gr.GraphWin) - the graphics window in use
+    red (int) [0, 255]  
+    green (int) [0, 255]  
+    blue (int) [0, 255] --- these are the RGB values for the background '''
     height = int(window.getHeight() / 10)
     color = gr.color_rgb(red, green, blue)
 
@@ -229,7 +276,9 @@ def drawGradient(window, red, green, blue):
         color = gr.color_rgb(red, green, blue)
     
 def drawPlayField(window):
-    ''' Creates a 10x20 grid where each space is 20 x 20 pixels '''
+    ''' Creates a 10x20 grid where each space is 20 x 20 pixels 
+    INPUT
+    window (gr.GraphWin) - the graphics window in use'''
     play_field = gr.Rectangle(gr.Point(300, 200), gr.Point(500, 600))
     play_field.setFill("#7A7A7A")
     play_field.draw(window)
@@ -269,7 +318,10 @@ def drawPlayField(window):
     hold_text.draw(window)
 
 def drawInstructions(window, play_field):
-    '''Draw instructional text, rules for game, and waits for user to push key to start '''
+    '''Draw instructional text, rules for game, and waits for user to push key to start 
+    INPUT
+    window (gr.GraphWin) - the graphics window in use
+    play_field (PlayGrid) - the main PlayGrid object in use'''
 
     big_pause_box = gr.Rectangle(gr.Point(30, 30), gr.Point(770, 770))
     big_pause_box.setFill("lightgreen")
@@ -302,7 +354,7 @@ def drawInstructions(window, play_field):
 
     push_start = gr.Text(gr.Point(400, 440), "Push any key to start/resume!\nPress Q to quit")
     push_start.draw(window)    
-    # Undraw everything when user pushed button
+    # Undraw everything when user pushes button
     input = window.getKey()
     if input.lower() == "q":
         play_field.gameOver()
@@ -314,7 +366,15 @@ def drawInstructions(window, play_field):
 
 def processInput(input, piece, play_field, window):
     ''' Takes user input as a string and responds appropriately
-    Returns the piece'''
+    Returns the piece
+    INPUT
+    input (Str) - user input on keyboard
+    piece (Quadromino) - the current active piece in play
+    play_field (PlayGrid) - the main PlayGrid being used for the game
+    window (gr.GraphWin) - the graphics window in use
+    
+    OUTPUT
+    piece (Quadromino) - an updated version of the piece in play'''
     if input == "w":
         piece.hardDrop(play_field)
         play_field.clearLines(window)
@@ -338,6 +398,13 @@ def processInput(input, piece, play_field, window):
     return piece
 
 def useNextQuadromino(window, play_field):
+    '''Draws and updates the next piece to be used
+    INPUT
+    window (gr.GraphWin) - the graphics window in use
+    play_field (PlayGrid) - the game's PlayGrid
+    
+    OUTPUT
+    piece (Quadromino) - the next piece to be used in active play '''
     piece = play_field.getNextQuadromino(window)
     piece.draw(window)
     return piece
@@ -362,7 +429,9 @@ def fallPiece(piece, play_field, lock_length, lock_time):
     
 def updateStats(score_txt, lines_txt, lvl_txt, score, lines, level):
     ''' Updates the score, nummber of lines cleared, and level on the GUI
-    _txt vairables should be graphics.Text objects, and other variables should be ints '''
+    INPUT
+    x_txt vairables should be (gr.Text) objects to display information
+    other variables should be (int)s that contain the information to display'''
     score_txt.setText("SCORE: " + str(score))
     lines_txt.setText("Lines\t    \nCleared: " + str(lines))
     lvl_txt.setText("LVL: " + str(level))
