@@ -7,6 +7,15 @@ To play this game, follow these steps:
 2. Make sure all files are in the same folder
 3. Run 'game.py' from the folder
 
+#### Keys to play
+- **A** - move piece left
+- **D** - move piece right
+- **S** - soft drop (move piece down by 1)
+- **W** - hard drop (move piece all the way down)
+- **Left Arrow or N** - rotate piece counterclockwise
+- **Right Arrow or M** - roate piece clockwise
+- **E** - hold (swap current piece with the HOLD piece)
+- **Esc** - pause game (pressing Q while paused will quit the game)
 
 ![quadris](https://user-images.githubusercontent.com/77563588/143782618-54c7fac5-3fa6-49d8-832b-c590078e01c1.png)
 
