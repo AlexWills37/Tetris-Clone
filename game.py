@@ -8,7 +8,7 @@
 #
 # Credits to Alexey Pajitnov for original game design of Tetris
 #         to John Zelle for the graphics.py package
-#         to Professor Eaton for teaching me everything I know Python
+#         to Professor Eaton for teaching me everything I know about Python
 #         to Python for being helpful for this project
 #         to Hope for always being there for me <3
 #         to Jacob for being a fellow Tetris fan and inspiring this journey
