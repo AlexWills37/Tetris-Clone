@@ -1,6 +1,9 @@
 # Tetris Clone
 This game "Quadtris" is a clone of the popular game Tetris made in Python using John Zelle's graphics.py package. This game was created as part of an assignment for my Intermediate Python class
 
+### Prerequisites
+In order to play this game on your computer, you must have Python3 installed.
+
 ### How to play
 To play this game, follow these steps:
 1. Download the project files
